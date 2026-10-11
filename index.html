@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>PIX Premier Football</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #050b24; overflow: hidden; }
+    #unity-canvas { width: 100%; height: 100%; display: block; background: #050b24; outline: none; }
+    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: "Segoe UI", Bahnschrift, Arial, sans-serif; color: #cfe6ff; background: radial-gradient(ellipse at 50% 20%, #12347e 0%, #050b24 70%); }
+    #loader h1 { margin: 0 0 6px; font-size: 40px; font-style: italic; letter-spacing: 1px; color: #fff; text-shadow: 0 0 18px #3993ff; }
+    #loader p { margin: 0 0 22px; font-size: 14px; letter-spacing: 3px; color: #8fb8ff; }
+    #bar { width: min(420px, 70vw); height: 14px; border: 2px solid #3993ff; border-radius: 3px; padding: 2px; box-shadow: 0 0 14px #1d5fd0; }
+    #fill { height: 100%; width: 0%; background: linear-gradient(90deg, #1d6dff, #7fd0ff); transition: width .15s; }
+    #note { margin-top: 14px; font-size: 12px; color: #6f8fc8; }
+    #fs { position: fixed; right: 10px; bottom: 10px; z-index: 5; font: 12px "Segoe UI", Arial, sans-serif; color: #cfe6ff;
+      background: rgba(10, 30, 80, .85); border: 1px solid #3993ff; border-radius: 3px; padding: 5px 9px; cursor: pointer; display: none;
+      transition: opacity .4s; }
+    #fs.away { opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="loader">
+    <h1>PIX PREMIER FOOTBALL</h1>
+    <p>0.1.0-alpha.50 &middot; WEB BUILD</p>
+    <div id="bar"><div id="fill"></div></div>
+    <div id="note">Loading&hellip; a pad or the keyboard both work. Click the game once to give it the keys.</div>
+  </div>
+  <button id="fs" title="Full screen">FULL SCREEN</button>
+  <script>
+    var buildUrl = "Build";
+    var config = {
+      dataUrl: buildUrl + "/v0.1.0-alpha.50.data.unityweb",
+      frameworkUrl: buildUrl + "/v0.1.0-alpha.50.framework.js.unityweb",
+      codeUrl: buildUrl + "/v0.1.0-alpha.50.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Peyton Parrish Games",
+      productName: "Premier PIX Football",
+      productVersion: "0.1.0-alpha.50",
+    };
+    var canvas = document.querySelector("#unity-canvas");
+    var script = document.createElement("script");
+    script.src = buildUrl + "/v0.1.0-alpha.50.loader.js";
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (progress) {
+        document.querySelector("#fill").style.width = (100 * progress) + "%";
+      }).then(function (instance) {
+        document.querySelector("#loader").style.display = "none";
+        var fs = document.querySelector("#fs");
+        fs.style.display = "block";
+        fs.onclick = function () { instance.SetFullscreen(1); };
+        // shown while the mouse moves, then out of the way of the game's footer
+        var hide = 0;
+        function wake() { fs.classList.remove("away"); clearTimeout(hide); hide = setTimeout(function () { fs.classList.add("away"); }, 2500); }
+        document.addEventListener("mousemove", wake);
+        wake();
+        canvas.focus();
+      }).catch(function (message) { alert(message); });
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
